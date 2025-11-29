@@ -1,6 +1,6 @@
 from pathlib import Path
 import logging
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 
 from SearchApi.version import v as version
 #from chromanew.chromanew import LocalEmbedding, PATH_EMBEDDING_MODEL, PATH_CHROMA
@@ -33,3 +33,18 @@ def search(query_text: str):  # sync multythread need test chroma
                       count_docs=COUNT_DOCS_IN_SEARCH_RES)
     if res:
         return {"Search Results": res}
+
+
+@app.post("/add")
+def append_documents(docs: list = Body(embed=True),
+                     ids: list = Body(embed=True)):
+    if docs and ids:
+        if len(docs) == len(ids):
+            res = core.append_docs(documents=docs, ids=ids)
+            if res:
+                return 'Documents successfully added.'
+            else:
+                return 'Something bad was happened.'
+        else:
+            return 'Count documents must be equal count ids.'
+

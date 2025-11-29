@@ -45,8 +45,9 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
         self.collection = self.vdb_client.get_or_create_collection(name=collection_name, embedding_function=self)
         # switch `add` to `upsert` to avoid adding the same documents every time
         self.collection.upsert(documents=documents, ids=ids)
+        return True
 
-    def search(self, query_texts: List[str], count_docs: int | None = SEARCH_DOCS_COUNT):
+    def search(self, query_texts: List[str], count_docs: int | None = SEARCH_DOCS_COUNT) -> list:
         if not hasattr(self, 'collection'):
             self.collection = self.vdb_client.get_or_create_collection(name=DEF_COLLECTION, embedding_function=self)
             # TODO сообщать о том, что пытаемся искать в созданной только что пустой коллекции
@@ -58,12 +59,12 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
             metadatas = results.get("metadatas")[0]
             distances = results.get("distances")[0]
 
-            answer = {}
+            answer = []
             for index, id in enumerate(ids):
-                answer[id] = {'id': id,
-                              'document': docs[index],
-                              'metadata': metadatas[index],
-                              'distance': distances[index]}
+                answer.append({'id': id,
+                               'document': docs[index],
+                               'metadata': metadatas[index],
+                               'distance': distances[index]})
             return answer
 
 s = logging.StreamHandler()
