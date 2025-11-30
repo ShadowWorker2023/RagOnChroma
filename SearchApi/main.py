@@ -47,4 +47,3 @@ def append_documents(docs: list = Body(embed=True),
                 return 'Something bad was happened.'
         else:
             return 'Count documents must be equal count ids.'
-

@@ -10,6 +10,7 @@ import chromadb
 #import torchvision
 from sentence_transformers import SentenceTransformer
 from chromadb import Documents, EmbeddingFunction, Embeddings
+from chromadb.config import Settings
 
 
 PATH_CHROMA = Path.cwd() / "data"
@@ -33,7 +34,8 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
         return self.model.encode_document(input).tolist()
 
     def _init_vector_db(self, path_to_vbd: Path):
-        self.vdb_client = chromadb.PersistentClient(path=path_to_vbd)
+        self.vdb_client = chromadb.PersistentClient(path=path_to_vbd,  # path to OnDisk or use .Client() InMemory mode
+                                                    settings=Settings(anonymized_telemetry=False))
         logging.info(f'ChromaDB init successfully, v{self.vdb_client.get_version()}')
 
     def _init_embedding_model(self, path_to_model: Path):
