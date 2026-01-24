@@ -23,7 +23,8 @@ core = chromanew.chromanew.LocalEmbedding()
 async def root(request: Request):
     client = request.client
     return {"message": "Api for get results of vector similarity search",
-            "example": f"http://{client.host}/search/*text_of_your_query*",
+            # "example": f"http://{client.host}/search/*text_of_your_query*", # not for container
+            "example": f"http://HOST/search/*text_of_your_query*",
             "version": version}
 
 
@@ -46,4 +47,4 @@ def append_documents(docs: list = Body(embed=True),
             else:
                 return 'Something bad was happened.'
         else:
-            return 'Count documents must be equal count ids.'
+            return 'Count documents must be equal count IDs.'
