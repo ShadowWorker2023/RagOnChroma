@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 from fastapi import FastAPI, Request, Body
+from yaml import safe_load
 
 from SearchApi.version import v as version
 #from chromanew.chromanew import LocalEmbedding, PATH_EMBEDDING_MODEL, PATH_CHROMA
@@ -13,8 +14,16 @@ app = FastAPI()
 
 # Load vector db class
 chromanew.chromanew.PATH_CHROMA = Path.cwd() / "chromanew" / "data"
-chromanew.chromanew.PATH_EMBEDDING_MODEL = Path.cwd() / "chromanew" / "embeddinggemma-300m"
-COUNT_DOCS_IN_SEARCH_RES = 2
+
+with open(Path.cwd() / "SearchApi" / "config.yaml", "r") as f:
+    config = safe_load(f)
+if config:
+    chromanew.chromanew.PATH_EMBEDDING_MODEL = Path.cwd() / "chromanew" / config.get("MODEL_DIR_NAME")
+    COUNT_DOCS_IN_SEARCH_RES = config.get("COUNT_DOCS_IN_SEARCH_RES")
+else:
+    chromanew.chromanew.PATH_EMBEDDING_MODEL = Path.cwd() / "chromanew" / "embeddinggemma-300m"
+    COUNT_DOCS_IN_SEARCH_RES = 2
+    logging.warning("Default config loaded.")
 
 core = chromanew.chromanew.LocalEmbedding()
 
@@ -24,7 +33,8 @@ async def root(request: Request):
     client = request.client
     return {"message": "Api for get results of vector similarity search",
             # "example": f"http://{client.host}/search/*text_of_your_query*", # not for container
-            "example": f"http://HOST/search/*text_of_your_query*",
+            "examples": {"search": f"http://HOST/search/*text_of_your_query*",
+                         "add_docs": "POST /add body:{'docs':[], 'ids':[]}"},
             "version": version}
 
 
