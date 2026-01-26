@@ -42,11 +42,14 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
         self.model = SentenceTransformer(str(path_to_model))
         logging.info('Embedding model loaded')
 
-    def append_docs(self, documents: list | None, ids, collection_name: str = DEF_COLLECTION):
+    def append_docs(self, documents: list | None, ids, collection_name: str = DEF_COLLECTION, meta: list[dict] = None):
         # switch `create_collection` to `get_or_create_collection` to avoid creating a new collection every time
         self.collection = self.vdb_client.get_or_create_collection(name=collection_name, embedding_function=self)
         # switch `add` to `upsert` to avoid adding the same documents every time
-        self.collection.upsert(documents=documents, ids=ids)
+        if meta:
+            self.collection.upsert(documents=documents, ids=ids, metadatas=meta)
+        else:
+            self.collection.upsert(documents=documents, ids=ids)
         return True
 
     def search(self, query_texts: List[str], count_docs: int | None = SEARCH_DOCS_COUNT) -> list:

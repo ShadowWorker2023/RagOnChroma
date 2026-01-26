@@ -48,10 +48,14 @@ def search(query_text: str):  # sync multythread need test chroma
 
 @app.post("/add")
 def append_documents(docs: list = Body(embed=True),
-                     ids: list = Body(embed=True)):
+                     ids: list = Body(embed=True),
+                     meta: list | None = Body(embed=True)):
     if docs and ids:
         if len(docs) == len(ids):
-            res = core.append_docs(documents=docs, ids=ids)
+            if meta:
+                res = core.append_docs(documents=docs, ids=ids, meta=meta)
+            else:
+                res = core.append_docs(documents=docs, ids=ids)
             if res:
                 return 'Documents successfully added.'
             else:
