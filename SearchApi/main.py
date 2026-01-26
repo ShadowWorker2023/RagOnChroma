@@ -34,7 +34,7 @@ async def root(request: Request):
     return {"message": "Api for get results of vector similarity search",
             # "example": f"http://{client.host}/search/*text_of_your_query*", # not for container
             "examples": {"search": f"http://HOST/search/*text_of_your_query*",
-                         "add_docs": "POST /add body:{'docs':[], 'ids':[]}"},
+                         "add_docs": "POST /add body:{'docs':[], 'ids':[], 'meta': null | [{},...]}"},
             "version": version}
 
 
