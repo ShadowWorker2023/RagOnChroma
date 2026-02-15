@@ -22,7 +22,6 @@ DEF_COLLECTION = "my_collection"
 class LocalEmbedding(EmbeddingFunction[Documents]):
     model: any
     vdb_client: any
-    collection: any
 
     def __init__(self):
         self._init_vector_db(path_to_vbd=PATH_CHROMA)
@@ -44,20 +43,20 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
 
     def append_docs(self, documents: list | None, ids, collection_name: str = DEF_COLLECTION, meta: list[dict] = None):
         # switch `create_collection` to `get_or_create_collection` to avoid creating a new collection every time
-        self.collection = self.vdb_client.get_or_create_collection(name=collection_name, embedding_function=self)
+        collection = self.vdb_client.get_or_create_collection(name=collection_name, embedding_function=self)
         # switch `add` to `upsert` to avoid adding the same documents every time
         if meta:
-            self.collection.upsert(documents=documents, ids=ids, metadatas=meta)
+            collection.upsert(documents=documents, ids=ids, metadatas=meta)
         else:
-            self.collection.upsert(documents=documents, ids=ids)
+            collection.upsert(documents=documents, ids=ids)
         return True
 
-    def search(self, query_texts: List[str], count_docs: int | None = SEARCH_DOCS_COUNT) -> list:
-        if not hasattr(self, 'collection'):
-            self.collection = self.vdb_client.get_or_create_collection(name=DEF_COLLECTION, embedding_function=self)
-            # TODO сообщать о том, что пытаемся искать в созданной только что пустой коллекции
-        results = self.collection.query(query_texts=query_texts,  # Chroma will embed this for you
-                                        n_results=count_docs)  # how many results to return
+    def search(self, query_texts: List[str],
+               count_docs: int | None = SEARCH_DOCS_COUNT,
+               collection_name: str | None = DEF_COLLECTION) -> list:
+        collection = self.vdb_client.get_or_create_collection(name=collection_name, embedding_function=self)
+        results = collection.query(query_texts=query_texts,  # Chroma will embed this for you
+                                   n_results=count_docs)  # how many results to return
         if results:
             ids = results.get('ids')[0]
             docs = results.get("documents")[0]
@@ -71,6 +70,19 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
                                'metadata': metadatas[index],
                                'distance': distances[index]})
             return answer
+
+    def get_collections(self) -> list:
+        # self.vdb_client.count_collections()
+        collections_list = []
+        collections = self.vdb_client.list_collections()
+        for collection in collections:
+            collections_list.append({"Name": collection.name,
+                                     "Id": collection.id,
+                                     "Count docs": collection.count(),
+                                     "Metadata": str(collection.metadata)})
+        if collections_list:
+            return collections_list
+
 
 s = logging.StreamHandler()
 logging.basicConfig(handlers=[s], level=logging.INFO)
