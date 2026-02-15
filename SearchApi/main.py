@@ -40,7 +40,10 @@ async def root(request: Request):
                                       "body": {'docs': [],
                                                "ids": [],
                                                "meta": 'null | [{},...]'}},
-                         "collections": {"GET": "http://HOST/collections"}},
+                         "collections": {"GET": "http://HOST/collections"},
+                         "embedding": {"POST": "http://HOST/embedding",
+                                       "body": {"doc": "some_text_to_embedding_into_vector"}}
+                         },
             "version": version}
 
 
