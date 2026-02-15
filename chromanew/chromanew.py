@@ -83,6 +83,11 @@ class LocalEmbedding(EmbeddingFunction[Documents]):
         if collections_list:
             return collections_list
 
+    def get_embedding(self, text: str) -> dict:
+        vector = self.model.encode(sentences=[text])
+        return {"embedding": vector.tolist(),
+                "size": vector.size}
+
 
 s = logging.StreamHandler()
 logging.basicConfig(handlers=[s], level=logging.INFO)

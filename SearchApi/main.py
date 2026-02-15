@@ -90,3 +90,10 @@ def append_documents(docs: list = Body(embed=True),
                 return 'Something bad was happened.'
         else:
             return 'Count documents must be equal count IDs.'
+
+
+@app.post("/embedding")
+def get_embedding(doc: str = Body(embed=True)):
+    embedding_result = core.get_embedding(text=doc)
+    return {"vector_size": embedding_result.get("size"),
+            "vector": embedding_result.get("embedding")}
